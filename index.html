@@ -118,7 +118,7 @@
 .answer-item, .request-card, .profile-card, .important-form,
 .nav-tab, .main, .section-title, .card-text, .card-author,
 .form-group input, .form-group select, .form-group label,
-.btn-logout, .btn-dismiss, .btn-theme, .answer-form input,
+.btn-logout, .btn-dismiss, .answer-form input,
 .photo-upload-btn, .answer-photo-upload, .empty-state {
 transition: background var(--transition), color var(--transition),
 border-color var(--transition), box-shadow var(--transition);
@@ -415,18 +415,7 @@ transition: all var(--transition);
 
 .btn-logout:hover { background: var(--danger-bg); color: var(--danger-text); border-color: #5a2020; }
 
-.btn-theme {
-width: 36px; height: 36px;
-background: var(--bg);
-border: 1.5px solid var(--border);
-border-radius: 50%;
-font-size: 17px;
-cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-transition: all var(--transition);
-flex-shrink: 0;
-}
-.btn-theme:hover { border-color: var(--primary); transform: rotate(20deg); }
+
 
 /* NAV TABS */
 .nav {
@@ -1445,7 +1434,6 @@ width: 100%;
       <div class="user-info">
         <div class="user-name" id="header-name"></div>
       </div>
-      <button class="btn-theme" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌙</button>
       <button class="btn-logout" onclick="doLogout()">Выйти</button>
     </div>
   </header>
@@ -2523,7 +2511,7 @@ function applyTheme(isLight) {
 }
 
 function toggleTheme() {
-  const isLight = document.body.getAttribute('data-theme') !== 'light';
+  const isLight = document.documentElement.getAttribute('data-theme') !== 'light';
   localStorage.setItem('class5a_theme', isLight ? 'light' : 'dark');
   applyTheme(isLight);
 }
