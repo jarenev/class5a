@@ -1,0 +1,2562 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<script>
+  // Применяем тему ДО рендера страницы — убирает мигание
+  (function(){
+    var t = localStorage.getItem('class5a_theme');
+    if (t) {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="5 «А»">
+<meta name="theme-color" content="#1a1a2e">
+<title>5 «А» Класс</title>
+<link rel="manifest" href="data:application/json;charset=utf-8,{
+  &quot;name&quot;: &quot;5 «А» Класс&quot;,
+  &quot;short_name&quot;: &quot;5 А&quot;,
+  &quot;start_url&quot;: &quot;.&quot;,
+  &quot;display&quot;: &quot;standalone&quot;,
+  &quot;background_color&quot;: &quot;#1a1a2e&quot;,
+  &quot;theme_color&quot;: &quot;#1a1a2e&quot;,
+  &quot;orientation&quot;: &quot;portrait&quot;,
+  &quot;icons&quot;: [{
+    &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a1a2e'/><text y='.9em' font-size='80' x='10'>📚</text></svg>&quot;,
+    &quot;sizes&quot;: &quot;any&quot;,
+    &quot;type&quot;: &quot;image/svg+xml&quot;
+  }]
+}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* backgrounds */
+    --bg:           #1a1a2e;
+    --card:         #22223b;
+    --input-bg:     #0d0e1c;
+    --auth-card-bg: #16172a;
+    /* text */
+    --text:         #f0eeff;
+    --muted:        #a0a8c0;
+    --placeholder:  #6068a0;
+    --label:        #8890b8;
+    /* borders */
+    --border:       #32325a;
+    --input-border: rgba(255,255,255,0.10);
+    /* primary */
+    --primary:      #7b8ff7;
+    --primary-light:#2a2d4a;
+    --primary-glow: rgba(123,143,247,0.20);
+    /* tags */
+    --admin-tag:        #b6f542;
+    --admin-tag-text:   #2a4a00;
+    --teacher-tag:      #ff4444;
+    --teacher-tag-text: #fff;
+    /* badges */
+    --badge-question-bg:   #1e2550;
+    --badge-question-text: #7b8ff7;
+    --badge-answer-bg:     #0e2e1e;
+    --badge-answer-text:   #4ade80;
+    /* important card */
+    --imp-bg:     linear-gradient(135deg,#2a2200,#22223b);
+    --imp-border: #6a4e00;
+    --imp-author: #ffd060;
+    /* answer item */
+    --answer-bg:     #1e2040;
+    --answer-border: #7b8ff7;
+    /* danger */
+    --danger-bg:     #3a1a1a;
+    --danger-text:   #ff7070;
+    --danger-border: #5a2020;
+    /* misc */
+    --accent:   #ff6b9d;
+    --shadow:   0 4px 24px rgba(0,0,0,0.25);
+    --radius:   18px;
+    --radius-sm:10px;
+    --transition: 0.22s cubic-bezier(.4,0,.2,1);
+  }
+
+/* LIGHT THEME */
+:root[data-theme=“light”] {
+–bg:           #f2f4f8;
+–card:         #ffffff;
+–input-bg:     #e8ecf5;
+–auth-card-bg: #ffffff;
+–text:         #1a1d2e;
+–muted:        #7c84a3;
+–placeholder:  #aab0c8;
+–label:        #7c84a3;
+–border:       #d8ddf0;
+–input-border: #d0d5e8;
+–primary:      #4f6ef7;
+–primary-light:#eef0ff;
+–primary-glow: rgba(79,110,247,0.15);
+–badge-question-bg:   #e8f0ff;
+–badge-question-text: #3a56e0;
+–badge-answer-bg:     #edfff5;
+–badge-answer-text:   #1a7a42;
+–imp-bg:     linear-gradient(135deg,#fffbea,#ffffff);
+–imp-border: #ffd060;
+–imp-author: #a07000;
+–answer-bg:     #eef0ff;
+–answer-border: #4f6ef7;
+–danger-bg:     #fff0f3;
+–danger-text:   #e02020;
+–danger-border: #ffd0d8;
+–shadow:   0 4px 24px rgba(79,110,247,0.08);
+}
+[data-theme=“light”] .auth-card { border-color: var(–border); }
+
+/* Smooth theme transitions */
+.header, .nav, .card, .ask-form-card, .important-card,
+.answer-item, .request-card, .profile-card, .important-form,
+.nav-tab, .main, .section-title, .card-text, .card-author,
+.form-group input, .form-group select, .form-group label,
+.btn-logout, .btn-dismiss, .btn-theme, .answer-form input,
+.photo-upload-btn, .answer-photo-upload, .empty-state {
+transition: background var(–transition), color var(–transition),
+border-color var(–transition), box-shadow var(–transition);
+}
+[data-theme=“light”] .toggle-box { background: #d0d5e8; }
+[data-theme=“light”] .loading-overlay { background: rgba(242,244,248,0.92); color: var(–text); }
+[data-theme=“light”] .toast { background: #1a1d2e; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+html {
+min-height: 100%;
+min-height: 100svh;
+overflow-x: hidden;
+margin: 0;
+padding: 0;
+}
+body {
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+background: var(–bg);
+color: var(–text);
+min-height: 100%;
+min-height: 100svh;
+overflow-x: hidden;
+margin: 0;
+padding: 0;
+padding-top: env(safe-area-inset-top);
+padding-bottom: env(safe-area-inset-bottom);
+padding-left: env(safe-area-inset-left);
+padding-right: env(safe-area-inset-right);
+transition: background 0.25s, color 0.25s;
+}
+
+/* –– AUTH SCREEN –– */
+#auth-screen {
+min-height: 100svh;
+display: flex;
+align-items: center;
+justify-content: center;
+background: linear-gradient(160deg, #3a4fd4 0%, #7c5cbf 45%, #d4527a 100%);
+position: fixed;
+inset: 0;
+overflow-y: auto;
+z-index: 200;
+}
+
+#auth-screen::before {
+content: ‘’;
+position: absolute;
+width: 600px; height: 600px;
+background: rgba(255,255,255,0.07);
+border-radius: 50%;
+top: -150px; left: -150px;
+}
+
+#auth-screen::after {
+content: ‘’;
+position: absolute;
+width: 400px; height: 400px;
+background: rgba(255,255,255,0.06);
+border-radius: 50%;
+bottom: -100px; right: -100px;
+}
+
+.auth-card {
+background: var(–auth-card-bg);
+border-radius: 28px;
+padding: 48px 44px 40px;
+width: 100%;
+max-width: 420px;
+box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+position: relative;
+z-index: 1;
+animation: slideUp 0.5s cubic-bezier(.4,0,.2,1);
+border: 1px solid var(–input-border);
+}
+
+@keyframes slideUp {
+from { opacity:0; transform: translateY(40px); }
+to { opacity:1; transform: translateY(0); }
+}
+
+.auth-logo {
+text-align: center;
+margin-bottom: 28px;
+}
+
+.auth-logo .emoji {
+font-size: 52px;
+display: block;
+margin-bottom: 8px;
+filter: drop-shadow(0 4px 8px rgba(79,110,247,0.3));
+}
+
+.auth-logo h1 {
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 28px;
+font-weight: 800;
+letter-spacing: -0.02em;
+background: linear-gradient(90deg, #a78bfa, #f472b6);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.auth-logo p {
+color: var(–label);
+font-size: 14px;
+margin-top: 6px;
+font-weight: 400;
+}
+
+.form-group {
+margin-bottom: 18px;
+}
+
+.form-group label {
+display: block;
+font-size: 12px;
+font-weight: 700;
+color: var(–label);
+text-transform: uppercase;
+letter-spacing: 0.08em;
+margin-bottom: 8px;
+}
+
+.form-group input, .form-group select {
+width: 100%;
+padding: 13px 16px;
+border: 1.5px solid var(–input-border);
+border-radius: var(–radius-sm);
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 15px;
+font-weight: 500;
+color: var(–text);
+background: var(–input-bg);
+outline: none;
+transition: border-color var(–transition), box-shadow var(–transition);
+-webkit-appearance: none;
+}
+
+.form-group input::placeholder, .form-group select::placeholder {
+color: var(–placeholder);
+}
+
+.form-group input:focus, .form-group select:focus {
+border-color: var(–primary);
+box-shadow: 0 0 0 3px var(–primary-glow);
+background: var(–input-bg);
+}
+
+.btn-primary {
+width: 100%;
+padding: 14px;
+background: linear-gradient(90deg, #4f6ef7, #818cf8);
+color: #fff;
+border: none;
+border-radius: var(–radius-sm);
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 16px;
+font-weight: 800;
+cursor: pointer;
+transition: transform var(–transition), box-shadow var(–transition), opacity var(–transition);
+box-shadow: 0 4px 20px rgba(79,110,247,0.35);
+margin-top: 8px;
+letter-spacing: 0.02em;
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 8px 28px rgba(79,110,247,0.45);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.auth-error {
+background: var(–danger-bg);
+color: var(–danger-text);
+border-radius: 8px;
+padding: 10px 14px;
+font-size: 13px;
+font-weight: 600;
+margin-top: 12px;
+display: none;
+border: 1.5px solid var(–danger-border);
+}
+
+/* –– MAIN APP –– */
+#app {
+display: none;
+min-height: 100vh;
+flex-direction: column;
+}
+
+/* HEADER */
+.header {
+background: var(–card);
+border-bottom: 1.5px solid var(–border);
+padding: 0 24px;
+height: 62px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+position: sticky;
+top: 0;
+z-index: 100;
+box-shadow: 0 2px 16px rgba(79,110,247,0.07);
+}
+
+.header-brand {
+display: flex;
+align-items: center;
+gap: 10px;
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif; letter-spacing: -0.01em;
+font-size: 20px;
+font-weight: 700;
+color: var(–primary);
+}
+
+.header-brand span { font-size: 26px; }
+
+.header-user {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.user-avatar {
+width: 38px; height: 38px;
+border-radius: 50%;
+background: linear-gradient(135deg, #4f6ef7, #ff6b9d);
+display: flex; align-items: center; justify-content: center;
+color: #fff;
+font-weight: 800;
+font-size: 16px;
+flex-shrink: 0;
+}
+
+.user-info {
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+}
+
+.user-name {
+font-weight: 700;
+font-size: 14px;
+line-height: 1.2;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.tag {
+display: inline-block;
+padding: 2px 9px;
+border-radius: 20px;
+font-size: 10px;
+font-weight: 800;
+letter-spacing: 0.04em;
+text-transform: uppercase;
+}
+
+.tag-creator {
+background: var(–admin-tag);
+color: var(–admin-tag-text);
+}
+.tag-admin {
+background: var(–admin-tag);
+color: var(–admin-tag-text);
+}
+
+.tag-teacher {
+background: var(–teacher-tag);
+color: var(–teacher-tag-text);
+}
+
+.btn-logout {
+background: var(–bg);
+border: 1.5px solid var(–border);
+border-radius: 8px;
+padding: 6px 12px;
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 12px;
+font-weight: 700;
+color: var(–muted);
+cursor: pointer;
+transition: all var(–transition);
+}
+
+.btn-logout:hover { background: var(–danger-bg); color: var(–danger-text); border-color: #5a2020; }
+
+.btn-theme {
+width: 36px; height: 36px;
+background: var(–bg);
+border: 1.5px solid var(–border);
+border-radius: 50%;
+font-size: 17px;
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+transition: all var(–transition);
+flex-shrink: 0;
+}
+.btn-theme:hover { border-color: var(–primary); transform: rotate(20deg); }
+
+/* NAV TABS */
+.nav {
+background: var(–card);
+padding: 0 24px;
+display: flex;
+gap: 4px;
+border-bottom: 1.5px solid var(–border);
+overflow-x: auto;
+scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+padding: 14px 18px 12px;
+font-size: 14px;
+font-weight: 700;
+color: var(–muted);
+cursor: pointer;
+border-bottom: 3px solid transparent;
+white-space: nowrap;
+transition: color var(–transition), border-color var(–transition);
+position: relative;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.nav-tab:hover { color: var(–primary); }
+
+.nav-tab.active {
+color: var(–primary);
+border-bottom-color: var(–primary);
+}
+
+.badge {
+background: var(–accent);
+color: #fff;
+border-radius: 20px;
+font-size: 10px;
+font-weight: 800;
+padding: 1px 7px;
+min-width: 18px;
+text-align: center;
+}
+
+/* MAIN CONTENT */
+.main {
+padding: 28px 24px 60px;
+max-width: 760px;
+margin: 0 auto;
+width: 100%;
+flex: 1;
+background: var(–bg);
+}
+
+.tab-panel { display: none; animation: fadeIn 0.25s ease; }
+.tab-panel.active { display: block; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* SECTION TITLE */
+.section-title {
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif; letter-spacing: -0.01em;
+font-size: 22px;
+font-weight: 700;
+color: var(–text);
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.section-title .icon { font-size: 26px; }
+
+/* CARDS */
+.card {
+background: var(–card);
+border-radius: var(–radius);
+padding: 20px 22px;
+margin-bottom: 14px;
+box-shadow: var(–shadow);
+border: 1.5px solid var(–border);
+transition: transform var(–transition), box-shadow var(–transition);
+}
+
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(79,110,247,0.13); }
+
+.card-meta {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 10px;
+flex-wrap: wrap;
+}
+
+.card-avatar {
+width: 32px; height: 32px;
+border-radius: 50%;
+background: linear-gradient(135deg, #818cf8, #a78bfa);
+display: flex; align-items: center; justify-content: center;
+color: #fff;
+font-weight: 800;
+font-size: 13px;
+flex-shrink: 0;
+}
+
+.card-author {
+font-weight: 700;
+font-size: 14px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.card-time {
+color: var(–muted);
+font-size: 12px;
+margin-left: auto;
+}
+
+.card-text {
+font-size: 15px;
+line-height: 1.6;
+color: var(–text);
+margin-bottom: 12px;
+}
+
+/* ANSWER SECTION */
+.answers-section { margin-top: 12px; padding-top: 12px; border-top: 1.5px dashed var(–border); }
+
+.answer-item {
+background: var(–primary-light);
+border-radius: 12px;
+padding: 12px 14px;
+margin-bottom: 8px;
+border-left: 4px solid var(–answer-border);
+}
+
+.answer-author {
+font-size: 12px;
+font-weight: 700;
+color: var(–primary);
+margin-bottom: 4px;
+display: flex;
+align-items: center;
+gap: 5px;
+}
+
+.answer-text {
+font-size: 14px;
+line-height: 1.5;
+color: var(–text);
+}
+
+.answer-form {
+margin-top: 10px;
+display: flex;
+gap: 8px;
+}
+
+.answer-form input {
+flex: 1;
+padding: 10px 14px;
+border: 1.5px solid var(–border);
+border-radius: 10px;
+font-family: ‘Inter’, -apple-system, sans-serif;
+font-size: 14px;
+font-weight: 500;
+color: var(–text);
+background: var(–input-bg);
+outline: none;
+transition: border-color var(–transition), background var(–transition), color var(–transition);
+-webkit-appearance: none;
+}
+
+.answer-form input:focus { border-color: var(–primary); background: var(–input-bg); box-shadow: 0 0 0 3px var(–primary-glow); }
+
+.btn-answer {
+padding: 10px 16px;
+background: var(–primary);
+color: #fff;
+border: none;
+border-radius: 10px;
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 13px;
+font-weight: 800;
+cursor: pointer;
+transition: background var(–transition), transform var(–transition);
+white-space: nowrap;
+}
+
+.btn-answer:hover { background: var(–primary); filter: brightness(0.85); transform: scale(1.04); }
+
+/* ASK FORM */
+.ask-form-card {
+background: var(–card);
+border-radius: var(–radius);
+padding: 28px 26px;
+box-shadow: var(–shadow);
+border: 1.5px solid var(–border);
+}
+
+.ask-form-card textarea {
+width: 100%;
+padding: 14px 16px;
+border: 2px solid var(–border);
+border-radius: 12px;
+font-family: ‘Inter’, -apple-system, sans-serif;
+font-size: 15px;
+font-weight: 500;
+color: var(–text);
+background: var(–input-bg);
+resize: vertical;
+min-height: 120px;
+outline: none;
+transition: border-color var(–transition), background var(–transition), color var(–transition);
+line-height: 1.6;
+margin-bottom: 14px;
+-webkit-appearance: none;
+}
+.ask-form-card textarea::placeholder { color: var(–placeholder); }
+.ask-form-card textarea:focus { border-color: var(–primary); box-shadow: 0 0 0 3px var(–primary-glow); background: var(–input-bg); }
+
+.btn-send {
+padding: 13px 28px;
+background: linear-gradient(90deg, #4f6ef7, #818cf8);
+color: #fff;
+border: none;
+border-radius: 10px;
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 15px;
+font-weight: 800;
+cursor: pointer;
+transition: transform var(–transition), box-shadow var(–transition);
+box-shadow: 0 4px 16px rgba(79,110,247,0.3);
+}
+
+.btn-send:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,110,247,0.4); }
+
+/* IMPORTANT SECTION */
+.important-card {
+background: var(–imp-bg);
+border: 2px solid var(–imp-border);
+border-radius: var(–radius);
+padding: 20px 22px;
+margin-bottom: 14px;
+box-shadow: 0 4px 20px rgba(255,204,0,0.12);
+position: relative;
+overflow: hidden;
+}
+
+.important-card::before {
+content: ‘⚡’;
+position: absolute;
+right: 16px;
+top: 14px;
+font-size: 28px;
+opacity: 0.18;
+}
+
+.important-card .card-text { font-size: 15px; color: var(–text); }
+
+.important-card .card-author { color: var(–imp-author); }
+
+.important-form {
+background: var(–card);
+border-radius: var(–radius);
+padding: 24px;
+box-shadow: var(–shadow);
+border: 1.5px solid var(–border);
+margin-top: 20px;
+}
+
+.important-form h3 {
+font-size: 16px;
+font-weight: 800;
+margin-bottom: 14px;
+color: var(–text);
+}
+
+/* REQUESTS TAB */
+.request-card {
+background: var(–card);
+border-radius: var(–radius);
+padding: 18px 20px;
+margin-bottom: 12px;
+box-shadow: var(–shadow);
+border: 1.5px solid var(–border);
+}
+
+.request-card .request-type {
+display: inline-block;
+padding: 3px 10px;
+border-radius: 20px;
+font-size: 11px;
+font-weight: 800;
+text-transform: uppercase;
+letter-spacing: 0.04em;
+margin-bottom: 8px;
+}
+
+.type-question { background: var(–badge-question-bg); color: var(–badge-question-text); }
+.type-answer { background: var(–badge-answer-bg); color: var(–badge-answer-text); }
+
+.request-actions {
+display: flex;
+gap: 8px;
+margin-top: 12px;
+flex-wrap: wrap;
+}
+
+.btn-promote {
+padding: 8px 16px;
+background: linear-gradient(90deg, #ffcc00, #ffaa00);
+color: #3a2800;
+border: none;
+border-radius: 8px;
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 13px;
+font-weight: 800;
+cursor: pointer;
+transition: transform var(–transition);
+box-shadow: 0 2px 10px rgba(255,200,0,0.3);
+}
+
+.btn-promote:hover { transform: scale(1.04); }
+
+.btn-dismiss {
+padding: 8px 14px;
+background: var(–bg);
+border: 1.5px solid var(–border);
+border-radius: 8px;
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 13px;
+font-weight: 700;
+color: var(–muted);
+cursor: pointer;
+transition: all var(–transition);
+}
+
+.btn-dismiss:hover { background: var(–danger-bg); color: var(–danger-text); border-color: #5a2020; }
+
+/* PHOTO UPLOAD */
+.photo-upload-area {
+margin-bottom: 14px;
+}
+
+.photo-upload-btn {
+display: inline-flex;
+align-items: center;
+gap: 7px;
+padding: 9px 16px;
+background: var(–input-bg);
+border: 2px dashed var(–border);
+border-radius: 10px;
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 13px;
+font-weight: 700;
+color: var(–muted);
+cursor: pointer;
+transition: all var(–transition);
+}
+
+.photo-upload-btn:hover {
+border-color: var(–primary);
+color: var(–primary);
+background: var(–primary-light);
+}
+
+.photo-upload-btn input { display: none; }
+
+.photo-previews {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+margin-top: 10px;
+}
+
+.photo-preview-wrap {
+position: relative;
+width: 80px;
+height: 80px;
+border-radius: 10px;
+overflow: hidden;
+border: 2px solid var(–border);
+flex-shrink: 0;
+}
+
+.photo-preview-wrap img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+display: block;
+}
+
+.photo-remove {
+position: absolute;
+top: 3px; right: 3px;
+width: 20px; height: 20px;
+background: rgba(0,0,0,0.65);
+color: #fff;
+border: none;
+border-radius: 50%;
+font-size: 11px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+line-height: 1;
+transition: background var(–transition);
+}
+
+.photo-remove:hover { background: #e02020; }
+
+/* PHOTO GALLERY IN CARDS */
+.card-photos {
+display: flex;
+flex-wrap: wrap;
+gap: 7px;
+margin-top: 10px;
+}
+
+.card-photo {
+width: 90px;
+height: 90px;
+border-radius: 10px;
+object-fit: cover;
+border: 2px solid var(–border);
+cursor: pointer;
+transition: transform var(–transition), box-shadow var(–transition);
+}
+
+.card-photo:hover { transform: scale(1.05); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+
+.loading-overlay {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.75);
+z-index: 99999;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 16px;
+color: var(–text);
+font-size: 15px;
+font-weight: 700;
+}
+
+.spinner {
+width: 40px; height: 40px;
+border: 4px solid rgba(255,255,255,0.15);
+border-top-color: var(–primary);
+border-radius: 50%;
+animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* LIGHTBOX */
+.lightbox {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.88);
+z-index: 9998;
+align-items: center;
+justify-content: center;
+}
+
+.lightbox.open { display: flex; }
+
+.lightbox img {
+max-width: 92vw;
+max-height: 88vh;
+border-radius: 14px;
+box-shadow: 0 8px 48px rgba(0,0,0,0.5);
+}
+
+.lightbox-close {
+position: absolute;
+top: 18px; right: 22px;
+background: rgba(255,255,255,0.12);
+border: none;
+color: #fff;
+font-size: 28px;
+cursor: pointer;
+border-radius: 50%;
+width: 44px; height: 44px;
+display: flex; align-items: center; justify-content: center;
+transition: background var(–transition);
+}
+
+.lightbox-close:hover { background: rgba(255,255,255,0.25); }
+
+/* ANSWER PHOTO */
+.answer-photos {
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+margin-top: 7px;
+}
+
+.answer-photos img {
+width: 70px;
+height: 70px;
+border-radius: 8px;
+object-fit: cover;
+border: 1.5px solid var(–border);
+cursor: pointer;
+transition: transform var(–transition);
+}
+
+.answer-photos img:hover { transform: scale(1.06); }
+
+.answer-photo-upload {
+display: inline-flex;
+align-items: center;
+gap: 5px;
+padding: 7px 12px;
+background: var(–bg);
+border: 1.5px dashed var(–border);
+border-radius: 8px;
+font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+font-size: 12px;
+font-weight: 700;
+color: var(–muted);
+cursor: pointer;
+transition: all var(–transition);
+white-space: nowrap;
+}
+
+.answer-photo-upload:hover { border-color: var(–primary); color: var(–primary); }
+.answer-photo-upload input { display: none; }
+
+/* EMPTY STATE */
+.empty-state {
+text-align: center;
+padding: 48px 24px;
+color: var(–muted);
+}
+
+.empty-state .em { font-size: 52px; display: block; margin-bottom: 14px; }
+.empty-state p { font-size: 15px; font-weight: 600; }
+
+/* SUCCESS TOAST */
+.toast {
+position: fixed;
+bottom: 28px;
+left: 50%;
+transform: translateX(-50%) translateY(80px);
+background: var(–text);
+color: var(–bg);
+padding: 13px 26px;
+border-radius: 40px;
+font-size: 14px;
+font-weight: 700;
+z-index: 9999;
+transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s;
+opacity: 0;
+white-space: nowrap;
+box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ANONYMOUS TOGGLE */
+.anon-toggle {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 14px;
+font-size: 14px;
+font-weight: 600;
+color: var(–muted);
+cursor: pointer;
+user-select: none;
+}
+
+.anon-toggle input { display: none; }
+
+.toggle-box {
+width: 40px; height: 22px;
+background: var(–border);
+border-radius: 11px;
+position: relative;
+transition: background var(–transition);
+}
+
+.toggle-box::after {
+content: ‘’;
+position: absolute;
+width: 16px; height: 16px;
+background: #fff;
+border-radius: 50%;
+top: 3px; left: 3px;
+transition: transform var(–transition);
+box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.anon-toggle input:checked + .toggle-box { background: var(–primary); }
+.anon-toggle input:checked + .toggle-box::after { transform: translateX(18px); }
+
+/* PROFILE */
+.profile-card {
+background: var(–card);
+border-radius: var(–radius);
+padding: 28px 26px;
+box-shadow: var(–shadow);
+border: 1.5px solid var(–border);
+}
+
+.profile-avatar-section {
+display: flex;
+align-items: center;
+gap: 22px;
+margin-bottom: 28px;
+padding-bottom: 24px;
+border-bottom: 1.5px solid var(–border);
+}
+
+.profile-avatar-wrap {
+position: relative;
+flex-shrink: 0;
+}
+
+.profile-avatar {
+width: 86px; height: 86px;
+border-radius: 50%;
+background: linear-gradient(135deg, #4f6ef7, #ff6b9d);
+display: flex; align-items: center; justify-content: center;
+font-size: 32px;
+font-weight: 800;
+color: #fff;
+overflow: hidden;
+border: 3px solid var(–border);
+}
+
+.profile-avatar img {
+width: 100%; height: 100%;
+object-fit: cover;
+border-radius: 50%;
+}
+
+.profile-avatar-edit {
+position: absolute;
+bottom: 2px; right: 2px;
+width: 26px; height: 26px;
+background: var(–primary);
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+font-size: 11px;
+cursor: pointer;
+border: 2px solid var(–card);
+transition: background var(–transition);
+}
+
+.profile-avatar-edit:hover { background: #3a56e0; }
+.profile-avatar-edit input { display: none; }
+
+.profile-fullname {
+font-size: 20px;
+font-weight: 800;
+color: var(–text);
+margin-bottom: 6px;
+}
+
+.profile-role-tag { margin-top: 4px; }
+
+.important-textarea {
+width: 100%;
+padding: 13px 15px;
+border: 2px solid var(–border);
+border-radius: 12px;
+font-family: ‘Inter’, -apple-system, sans-serif;
+font-size: 15px;
+font-weight: 500;
+min-height: 100px;
+resize: vertical;
+outline: none;
+transition: border-color var(–transition), background var(–transition), color var(–transition);
+background: var(–input-bg);
+color: var(–text);
+-webkit-appearance: none;
+}
+.important-textarea::placeholder { color: var(–placeholder); }
+.important-textarea:focus { border-color: var(–primary); box-shadow: 0 0 0 3px var(–primary-glow); }
+
+/* AUTH STEP ANIMATIONS */
+#auth-step1, #auth-step2 {
+animation: stepIn 0.32s cubic-bezier(.4,0,.2,1);
+}
+@keyframes stepIn {
+from { opacity: 0; transform: translateX(24px); }
+to   { opacity: 1; transform: translateX(0); }
+}
+
+/* USER LIST */
+.user-list {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin-top: 4px;
+}
+
+.user-list-item {
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 13px 16px;
+background: var(–input-bg);
+border: 1.5px solid var(–input-border);
+border-radius: 14px;
+cursor: pointer;
+transition: border-color var(–transition), background var(–transition), transform 0.15s;
+-webkit-tap-highlight-color: transparent;
+}
+.user-list-item:hover {
+border-color: var(–primary);
+background: var(–primary-light);
+transform: scale(1.01);
+}
+.user-list-item:active { transform: scale(0.98); }
+
+.user-list-avatar {
+width: 44px; height: 44px;
+border-radius: 50%;
+background: linear-gradient(135deg, #4f6ef7, #ff6b9d);
+display: flex; align-items: center; justify-content: center;
+font-size: 17px;
+font-weight: 800;
+color: #fff;
+flex-shrink: 0;
+overflow: hidden;
+}
+.user-list-avatar img {
+width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+
+.user-list-info { flex: 1; min-width: 0; }
+.user-list-name {
+font-size: 15px;
+font-weight: 700;
+color: var(–text);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+.user-list-role {
+font-size: 12px;
+font-weight: 500;
+color: var(–muted);
+margin-top: 1px;
+}
+
+.user-list-chevron {
+color: var(–muted);
+font-size: 16px;
+flex-shrink: 0;
+}
+
+/* SELECTED USER IN STEP 2 */
+.auth-selected-user {
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 14px 16px;
+background: var(–primary-light);
+border: 1.5px solid var(–primary);
+border-radius: 14px;
+margin-bottom: 4px;
+}
+
+.auth-user-avatar {
+width: 44px; height: 44px;
+border-radius: 50%;
+background: linear-gradient(135deg, #4f6ef7, #ff6b9d);
+display: flex; align-items: center; justify-content: center;
+font-size: 17px;
+font-weight: 800;
+color: #fff;
+flex-shrink: 0;
+overflow: hidden;
+}
+.auth-user-avatar img {
+width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+
+.auth-user-name {
+font-size: 15px;
+font-weight: 700;
+color: var(–text);
+}
+
+/* BACK BUTTON */
+.user-list-empty {
+text-align: center;
+color: var(–muted);
+font-size: 15px;
+padding: 28px 16px;
+line-height: 1.6;
+}
+.btn-register {
+width: 100%;
+margin-top: 14px;
+padding: 13px;
+background: transparent;
+border: 2px dashed var(–border);
+border-radius: 12px;
+color: var(–primary);
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.18s;
+}
+.btn-register:hover { background: var(–primary-light); border-color: var(–primary); }
+.role-picker {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin-top: 6px;
+}
+.role-option {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 16px;
+border-radius: 12px;
+border: 2px solid var(–border);
+background: var(–input-bg);
+cursor: pointer;
+transition: all 0.18s;
+font-size: 15px;
+color: var(–text);
+}
+.role-option:hover { border-color: var(–primary); background: var(–primary-light); }
+.role-option.selected { border-color: var(–primary); background: var(–primary-light); color: var(–primary); font-weight: 600; }
+.role-icon { font-size: 20px; }
+.role-label { flex: 1; }
+
+.role-mgmt-row {
+display: flex; align-items: center; gap: 12px;
+padding: 10px 0; border-bottom: 1px solid var(–border);
+}
+.role-mgmt-row:last-child { border-bottom: none; }
+.role-mgmt-avatar {
+width: 36px; height: 36px; border-radius: 50%;
+background: linear-gradient(135deg, var(–primary), var(–primary-light));
+display: flex; align-items: center; justify-content: center;
+font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.role-mgmt-name { flex: 1; font-weight: 600; font-size: 14px; }
+.role-mgmt-btn {
+padding: 5px 12px; border-radius: 20px; border: none; cursor: pointer;
+font-size: 12px; font-weight: 600; transition: opacity .15s;
+}
+.role-mgmt-btn:hover { opacity: 0.85; }
+.role-mgmt-btn.promote {
+background: var(–primary); color: #fff;
+}
+.role-mgmt-btn.demote {
+background: var(–danger-bg, #fee2e2); color: var(–danger-text, #dc2626);
+}
+.btn-back {
+width: 100%;
+padding: 11px;
+background: transparent;
+color: var(–primary);
+border: none;
+border-radius: var(–radius-sm);
+font-family: ‘Inter’, -apple-system, sans-serif;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+margin-top: 6px;
+transition: opacity var(–transition);
+}
+.btn-back:hover { opacity: 0.7; }
+
+.profile-section-title {
+font-size: 15px;
+font-weight: 800;
+color: var(–text);
+margin-bottom: 16px;
+margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+/* AUTH */
+#auth-screen {
+align-items: flex-start;
+padding: 40px 0 24px;
+min-height: 100svh;
+overflow-y: auto;
+}
+.auth-card {
+padding: 32px 22px 28px;
+margin: 0 16px;
+width: calc(100% - 32px);
+box-sizing: border-box;
+border-radius: 22px;
+}
+.auth-logo .emoji { font-size: 44px; }
+.auth-logo h1 { font-size: 22px; }
+.form-group input, .form-group select {
+font-size: 16px; /* предотвращает zoom на iOS */
+padding: 14px 14px;
+box-sizing: border-box;
+width: 100%;
+}
+.btn-primary { font-size: 16px; padding: 15px; }
+
+```
+/* APP */
+.main { padding: 16px 12px 80px; }
+.header { padding: 0 14px; height: 56px; }
+.header-brand { font-size: 17px; }
+.nav { padding: 0 6px; }
+.nav-tab { padding: 11px 10px 9px; font-size: 12px; gap: 3px; }
+.user-info { display: none; }
+.section-title { font-size: 18px; }
+.card { padding: 16px 15px; }
+.card-photo { width: 75px; height: 75px; }
+.profile-avatar { width: 72px; height: 72px; font-size: 26px; }
+.profile-fullname { font-size: 17px; }
+.ask-form-card { padding: 20px 16px; }
+.ask-form-card textarea { font-size: 16px; }
+```
+
+}
+</style>
+
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="emoji">📚</span>
+      <h1>5 «А» Класс</h1>
+      <p id="auth-subtitle">Войдите в свой аккаунт</p>
+    </div>
+
+```
+<!-- ШАГ 1: список пользователей + кнопка добавить -->
+<div id="auth-step1">
+  <div class="user-list" id="user-list">
+    <!-- заполняется JS -->
+  </div>
+  <div class="auth-error" id="auth-error-step1"></div>
+</div>
+
+<!-- ШАГ 2: пароль -->
+<div id="auth-step2" style="display:none;">
+  <div class="auth-selected-user" id="auth-selected-user">
+    <div class="auth-user-avatar" id="auth-user-avatar"></div>
+    <div class="auth-user-name" id="auth-user-name"></div>
+  </div>
+  <div class="form-group" style="margin-top:20px;">
+    <label>Пароль</label>
+    <input type="password" id="login-password" placeholder="Введите пароль" autocomplete="current-password">
+  </div>
+  <button class="btn-primary" onclick="doLogin()">Войти ✨</button>
+  <button class="btn-back" onclick="goBackToStep1()">← Другой пользователь</button>
+  <div class="auth-error" id="auth-error"></div>
+</div>
+
+<!-- ШАГ 3: регистрация -->
+<div id="auth-step3" style="display:none;">
+  <div class="form-group">
+    <label>Имя и фамилия</label>
+    <input type="text" id="reg-name" placeholder="Например: Иван Петров" autocomplete="name">
+  </div>
+  <div class="form-group">
+    <label>Роль</label>
+    <div class="role-picker" id="role-picker">
+      <!-- заполняется JS -->
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Пароль</label>
+    <input type="password" id="reg-password" placeholder="Придумайте пароль">
+  </div>
+  <div class="form-group">
+    <label>Повторите пароль</label>
+    <input type="password" id="reg-password2" placeholder="Повторите пароль">
+  </div>
+  <button class="btn-primary" onclick="doRegister()">Создать аккаунт ✨</button>
+  <button class="btn-back" onclick="goBackToStep1()">← Назад</button>
+  <div class="auth-error" id="auth-error-reg"></div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- APP -->
+
+<div id="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-brand">
+      <span>📚</span> 5 «А»
+    </div>
+    <div class="header-user">
+      <div class="user-avatar" id="header-avatar"></div>
+      <div class="user-info">
+        <div class="user-name" id="header-name"></div>
+      </div>
+      <button class="btn-theme" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌙</button>
+      <button class="btn-logout" onclick="doLogout()">Выйти</button>
+    </div>
+  </header>
+
+  <!-- NAV -->
+
+  <nav class="nav" id="main-nav">
+    <div class="nav-tab active" data-tab="questions" onclick="switchTab('questions')">
+      💬 Вопросы
+    </div>
+    <div class="nav-tab" data-tab="ask" onclick="switchTab('ask')">
+      ✏️ Задать вопрос
+    </div>
+    <div class="nav-tab" data-tab="important" onclick="switchTab('important')">
+      ⚡ Важное
+    </div>
+    <div class="nav-tab" id="tab-requests" data-tab="requests" onclick="switchTab('requests')" style="display:none;">
+      📥 Запросы <span class="badge" id="requests-badge">0</span>
+    </div>
+    <div class="nav-tab" data-tab="profile" onclick="switchTab('profile')">
+      👤 Профиль
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+
+  <main class="main">
+
+```
+<!-- QUESTIONS TAB -->
+<div class="tab-panel active" id="panel-questions">
+  <div class="section-title"><span class="icon">💬</span> Вопросы от ребят</div>
+  <div id="questions-list"></div>
+</div>
+
+<!-- ASK TAB -->
+<div class="tab-panel" id="panel-ask">
+  <div class="section-title"><span class="icon">✏️</span> Задать вопрос</div>
+  <div class="ask-form-card">
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>Ваш вопрос или сообщение</label>
+      <textarea id="ask-text" placeholder="Напишите свой вопрос или сообщение классу..."></textarea>
+    </div>
+    <div class="photo-upload-area">
+      <label class="photo-upload-btn">
+        <input type="file" id="ask-photos" accept="image/*" multiple onchange="handlePhotoSelect('ask-photos','ask-previews')">
+        📷 Прикрепить фото (до 3)
+      </label>
+      <div class="photo-previews" id="ask-previews"></div>
+    </div>
+    <label class="anon-toggle">
+      <input type="checkbox" id="anon-toggle">
+      <span class="toggle-box"></span>
+      Отправить анонимно
+    </label>
+    <button class="btn-send" onclick="submitQuestion()">Отправить вопрос 🚀</button>
+  </div>
+</div>
+
+<!-- IMPORTANT TAB -->
+<div class="tab-panel" id="panel-important">
+  <div class="section-title"><span class="icon">⚡</span> Важное</div>
+  <div id="important-list"></div>
+  <div id="important-form-section" style="display:none;">
+    <div class="important-form">
+      <h3>📢 Опубликовать важное сообщение</h3>
+      <div class="form-group" style="margin-bottom:14px;">
+      <textarea id="important-text" placeholder="Введите важное объявление для класса..." class="important-textarea"></textarea>
+      </div>
+      <div class="photo-upload-area">
+        <label class="photo-upload-btn">
+          <input type="file" id="imp-photos" accept="image/*" multiple onchange="handlePhotoSelect('imp-photos','imp-previews')">
+          📷 Прикрепить фото (до 3)
+        </label>
+        <div class="photo-previews" id="imp-previews"></div>
+      </div>
+      <button class="btn-send" onclick="postImportant()">Опубликовать ⚡</button>
+    </div>
+  </div>
+</div>
+
+<!-- REQUESTS TAB (admin only) -->
+<div class="tab-panel" id="panel-requests">
+  <div class="section-title"><span class="icon">📥</span> Запросы</div>
+  <div id="requests-list"></div>
+</div>
+
+<!-- PROFILE TAB -->
+<div class="tab-panel" id="panel-profile">
+  <div class="section-title"><span class="icon">👤</span> Профиль</div>
+  <div class="profile-card">
+    <div class="profile-avatar-section">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" id="profile-avatar-display"></div>
+        <label class="profile-avatar-edit" title="Сменить аватарку">
+          <input type="file" id="avatar-file-input" accept="image/*" onchange="handleAvatarUpload(this)">
+          ✏️
+        </label>
+      </div>
+      <div class="profile-name-block">
+        <div class="profile-fullname" id="profile-fullname"></div>
+        <div class="profile-role-tag" id="profile-role-tag"></div>
+      </div>
+    </div>
+    <div class="profile-section-title">🔒 Сменить пароль</div>
+    <div class="form-group">
+      <label>Текущий пароль</label>
+      <input type="password" id="pwd-current" placeholder="Введите текущий пароль">
+    </div>
+    <div class="form-group">
+      <label>Новый пароль</label>
+      <input type="password" id="pwd-new" placeholder="Придумайте новый пароль">
+    </div>
+    <div class="form-group">
+      <label>Повторите новый пароль</label>
+      <input type="password" id="pwd-confirm" placeholder="Повторите новый пароль">
+    </div>
+    <button class="btn-send" onclick="changePassword()">Сменить пароль 🔒</button>
+  </div>
+
+  <!-- Управление ролями — только для creator -->
+  <div id="role-management-section" style="display:none;">
+    <div class="section-title" style="margin-top:24px;"><span class="icon">👑</span> Управление ролями</div>
+    <div class="card" id="role-management-list" style="padding:12px 16px;"></div>
+  </div>
+</div>
+```
+
+  </main>
+</div>
+
+<!-- LOADING OVERLAY -->
+
+<div class="loading-overlay" id="loading-overlay" style="display:none;">
+  <div class="spinner"></div>
+  <span>Загрузка данных...</span>
+</div>
+
+<!-- LIGHTBOX -->
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- TOAST -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================
+// DATA & USERS
+// ============================
+// Дефолтные пользователи (пароли — SHA-256 хеши)
+// При первом запуске они сохранятся в JSONbin, потом берутся оттуда
+// Пользователи захардкожены — регистрация через кнопку убрана
+const DEFAULT_USERS = [
+  { id:'u_preset_1',  name:'Троянов Дмитрий',  role:'creator', initials:'ТД', passwordHash:'964e486889bc12e62649f4e54e75abdb77ff4bb1b9a1288f930e4839b94af730', avatar:null },
+  { id:'u_preset_2',  name:'Ирина Алексеевна', role:'teacher', initials:'ИА', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_3',  name:'Корева София',      role:'admin',   initials:'КС', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_4',  name:'Бганцева Дарья',    role:'admin',   initials:'БД', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_5',  name:'Эшиев Эльдар',      role:'pupil',   initials:'ЭЭ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_6',  name:'Попов Артем',        role:'pupil',   initials:'ПА', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_7',  name:'Бюттнер Эмилия',    role:'pupil',   initials:'БЭ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_8',  name:'Жеков Артем',        role:'pupil',   initials:'ЖА', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_9',  name:'Павленко Дмитрий',  role:'pupil',   initials:'ПД', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_10', name:'Самарина Ева',       role:'pupil',   initials:'СЕ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_11', name:'Конакова Полина',    role:'pupil',   initials:'КП', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_12', name:'Швец Амелия',        role:'pupil',   initials:'ША', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_13', name:'Сокур Настя',        role:'pupil',   initials:'СН', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_14', name:'Чекан Вика',         role:'pupil',   initials:'ЧВ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_15', name:'Чернышева Ева',      role:'pupil',   initials:'ЧЕ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_16', name:'Романов Вова',       role:'pupil',   initials:'РВ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_17', name:'Моргунова Диана',    role:'pupil',   initials:'МД', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_18', name:'Пинчук Богдан',      role:'pupil',   initials:'ПБ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_19', name:'Мохов Семен',        role:'pupil',   initials:'МС', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_20', name:'Романюха Илья',      role:'pupil',   initials:'РИ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_21', name:'Бачковская Настя',   role:'pupil',   initials:'БН', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_22', name:'Крюков Саша',        role:'pupil',   initials:'КС', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_23', name:'Семенов Артем',      role:'pupil',   initials:'СА', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_24', name:'Ефимчук Максим',     role:'pupil',   initials:'ЕМ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_25', name:'Моргунова Милана',   role:'pupil',   initials:'ММ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_26', name:'Криводеров Артем',   role:'pupil',   initials:'КА', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_27', name:'Лаврищева Кира',     role:'pupil',   initials:'ЛК', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_28', name:'Самадов Али',         role:'pupil',   initials:'СА', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_29', name:'Хмелевская Влада',    role:'pupil',   initials:'ХВ', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+  { id:'u_preset_30', name:'Имбировская Арина',   role:'pupil',   initials:'ИА', passwordHash:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', avatar:null },
+];
+// Роли с метаданными
+const ROLES = [
+  { id: 'creator', label: 'Создатель',             icon: '👑' },
+  { id: 'admin',   label: 'Администратор',          icon: '⚙️' },
+  { id: 'teacher', label: 'Классный руководитель',  icon: '📋' },
+  { id: 'pupil',   label: 'Ученик',                 icon: '🎒' },
+];
+let USERS = [];
+
+// Data
+let questions = [];
+let importantPosts = [];
+let requests = [];
+
+let currentUser = null;
+let nextQuestionId = 1;
+let nextImportantId = 1;
+let nextRequestId = 1;
+
+// ============================
+// CRYPTO
+// ============================
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ============================
+// JSONBIN
+// ============================
+const BIN_KEY = '$2a$10$nOBnP/FXGXqRLbP0p3epne7xLCwGuOzzIRRKIfjTv8GPlFSl.ZJNG';
+const BIN_URL_BASE = 'https://api.jsonbin.io/v3/b';
+const BIN_VERSION = 'v7_preset30'; // 27 захардкоженных пользователей
+if (localStorage.getItem('class5a_bin_version') !== BIN_VERSION) {
+  localStorage.removeItem('class5a_bin_id');
+  localStorage.removeItem('class5a_current_user');
+  localStorage.setItem('class5a_bin_version', BIN_VERSION);
+}
+let BIN_ID = localStorage.getItem('class5a_bin_id') || null;
+
+function binHeaders(write = false) {
+  const h = { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY };
+  if (!write) h['X-Bin-Meta'] = 'false';
+  return h;
+}
+
+async function loadData() {
+  showLoadingOverlay(true);
+  try {
+    if (BIN_ID) {
+      const res = await fetch(`${BIN_URL_BASE}/${BIN_ID}/latest`, { headers: binHeaders() });
+      const data = await res.json();
+      // Берём пользователей из бина; если бин пустой — используем пресет
+      USERS = (data.users && data.users.length) ? data.users : DEFAULT_USERS.map(u => ({...u}));
+      questions = data.questions || [];
+      importantPosts = data.importantPosts || [];
+      requests = data.requests || [];
+      nextQuestionId = data.meta?.nextQ || (questions.length ? Math.max(...questions.map(q=>q.id))+1 : 1);
+      nextImportantId = data.meta?.nextI || (importantPosts.length ? Math.max(...importantPosts.map(p=>p.id))+1 : 1);
+      nextRequestId = data.meta?.nextR || (requests.length ? Math.max(...requests.map(r=>r.id))+1 : 1);
+    } else {
+      // Бин ещё не создан — используем пресет локально
+      USERS = DEFAULT_USERS.map(u => ({...u}));
+    }
+  } catch(e) {
+    showToast('Ошибка загрузки данных 😢');
+    if (!USERS.length) USERS = DEFAULT_USERS.map(u => ({...u}));
+  }
+  showLoadingOverlay(false);
+}
+
+// ── Очередь сохранений: debounce 600ms + 3 попытки ──────────────────────────
+let _saveTimer = null;
+let _saving = false;
+let _pendingSave = false;
+
+function saveData() {
+  // debounce — откладываем на 600ms, чтобы не спамить при быстрых действиях
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_flushSave, 600);
+}
+
+async function _flushSave() {
+  if (_saving) { _pendingSave = true; return; }
+  if (!BIN_ID) return;
+  _saving = true;
+  _pendingSave = false;
+
+  const body = JSON.stringify({
+    users: USERS, questions, importantPosts, requests,
+    meta: { nextQ: nextQuestionId, nextI: nextImportantId, nextR: nextRequestId }
+  });
+
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      const res = await fetch(`${BIN_URL_BASE}/${BIN_ID}`, {
+        method: 'PUT',
+        headers: binHeaders(true),
+        body
+      });
+      if (res.ok) { _saving = false; if (_pendingSave) _flushSave(); return; }
+      if (res.status === 429) {
+        await new Promise(r => setTimeout(r, 2000 * attempt)); // rate-limit
+        continue;
+      }
+      // другая ошибка — ждём и повторяем
+      await new Promise(r => setTimeout(r, 1000 * attempt));
+    } catch(e) {
+      await new Promise(r => setTimeout(r, 1000 * attempt));
+    }
+  }
+  _saving = false;
+  showToast('Не удалось сохранить, проверьте интернет 😢');
+}
+
+function showLoadingOverlay(show) {
+  document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+}
+
+// ============================
+// PHOTO STATE
+// ============================
+const photoState = {
+  'ask': [],
+  'imp': [],
+};
+// per-answer photo state: key = qId
+const answerPhotoState = {};
+
+function handlePhotoSelect(inputId, previewId) {
+  const stateKey = inputId === 'ask-photos' ? 'ask' : 'imp';
+  const input = document.getElementById(inputId);
+  const files = Array.from(input.files);
+  const current = photoState[stateKey];
+  const remaining = 3 - current.length;
+  const toAdd = files.slice(0, remaining);
+
+  toAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      current.push(e.target.result);
+      renderPreviews(stateKey, previewId);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  if (files.length > remaining) showToast(`Максимум 3 фото!`);
+  input.value = '';
+}
+
+function renderPreviews(stateKey, previewId) {
+  const container = document.getElementById(previewId);
+  if (!container) return;
+  container.innerHTML = photoState[stateKey].map((src, i) => `
+    <div class="photo-preview-wrap">
+      <img src="${src}" alt="">
+      <button class="photo-remove" onclick="removePhoto('${stateKey}','${previewId}',${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removePhoto(stateKey, previewId, index) {
+  photoState[stateKey].splice(index, 1);
+  renderPreviews(stateKey, previewId);
+}
+
+// Answer photo handlers
+function handleAnswerPhotoSelect(inputEl, qId) {
+  if (!answerPhotoState[qId]) answerPhotoState[qId] = [];
+  const files = Array.from(inputEl.files);
+  const current = answerPhotoState[qId];
+  const remaining = 3 - current.length;
+  const toAdd = files.slice(0, remaining);
+
+  toAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      current.push(e.target.result);
+      renderAnswerPreviews(qId);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  if (files.length > remaining) showToast('Максимум 3 фото!');
+  inputEl.value = '';
+}
+
+function renderAnswerPreviews(qId) {
+  const container = document.getElementById(`ans-photo-preview-${qId}`);
+  if (!container) return;
+  const photos = answerPhotoState[qId] || [];
+  container.innerHTML = photos.map((src, i) => `
+    <div class="photo-preview-wrap">
+      <img src="${src}" alt="">
+      <button class="photo-remove" onclick="removeAnswerPhoto(${qId},${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeAnswerPhoto(qId, index) {
+  if (answerPhotoState[qId]) {
+    answerPhotoState[qId].splice(index, 1);
+    renderAnswerPreviews(qId);
+  }
+}
+
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+function renderPhotoGallery(photos, cls='card-photo') {
+  if (!photos || !photos.length) return '';
+  return `<div class="card-photos">${photos.map(src =>
+    `<img class="${cls}" src="${src}" alt="" onclick="openLightbox('${src}')">`
+  ).join('')}</div>`;
+}
+
+// ============================
+// POPULATE LOGIN
+// ============================
+// ============================
+// AUTH — двухшаговый вход
+// ============================
+let selectedUserId = null;
+
+async function populateLogin() {
+  showLoadingOverlay(true);
+  if (!BIN_ID && localStorage.getItem('class5a_bin_id')) {
+    BIN_ID = localStorage.getItem('class5a_bin_id');
+  }
+  if (BIN_ID) {
+    try {
+      const res = await fetch(`${BIN_URL_BASE}/${BIN_ID}/latest`, { headers: binHeaders() });
+      const data = await res.json();
+      USERS = (data.users && data.users.length) ? data.users : DEFAULT_USERS.map(u => ({...u}));
+    } catch(e) {
+      USERS = DEFAULT_USERS.map(u => ({...u}));
+    }
+  } else {
+    USERS = DEFAULT_USERS.map(u => ({...u}));
+  }
+  showLoadingOverlay(false);
+  renderUserList();
+}
+
+function roleLabel(r) {
+  if (r === 'creator') return 'Создатель';
+  if (r === 'admin')   return 'Администратор';
+  if (r === 'teacher') return 'Классный руководитель';
+  return 'Ученик';
+}
+
+function getInitials(name) {
+  return name.trim().split(/\s+/).map(w => w[0].toUpperCase()).slice(0, 2).join('');
+}
+
+function renderUserList() {
+  const list = document.getElementById('user-list');
+  const gradients = ['135deg,#4f6ef7,#a78bfa', '135deg,#f472b6,#ff6b9d', '135deg,#34d399,#059669', '135deg,#f59e0b,#ef4444', '135deg,#06b6d4,#3b82f6'];
+
+  if (!USERS.length) {
+    list.innerHTML = '<div class="user-list-empty">Аккаунтов пока нет.<br>Нажмите «+ Добавить аккаунт»</div>';
+    return;
+  }
+
+  list.innerHTML = USERS.map((u, i) => {
+    const avatarContent = u.avatar ? `<img src="${u.avatar}">` : (u.initials || getInitials(u.name));
+    const grad = gradients[i % gradients.length];
+    return `
+      <div class="user-list-item" onclick="selectUser('${u.id}')">
+        <div class="user-list-avatar" style="background:linear-gradient(${grad})">${avatarContent}</div>
+        <div class="user-list-info">
+          <div class="user-list-name">${u.name}</div>
+          <div class="user-list-role">${roleLabel(u.role)}</div>
+        </div>
+        <div class="user-list-chevron">›</div>
+      </div>`;
+  }).join('');
+}
+
+function selectUser(userId) {
+  selectedUserId = userId;
+  const user = USERS.find(u => u.id === userId);
+  if (!user) return;
+
+  const av = document.getElementById('auth-user-avatar');
+  av.style.background = 'linear-gradient(135deg,#4f6ef7,#a78bfa)';
+  av.innerHTML = user.avatar ? `<img src="${user.avatar}">` : (user.initials || getInitials(user.name));
+  document.getElementById('auth-user-name').textContent = user.name;
+  document.getElementById('auth-subtitle').textContent = 'Введите пароль';
+
+  showAuthStep('step2');
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('login-password').value = '';
+  setTimeout(() => document.getElementById('login-password').focus(), 100);
+}
+
+function goBackToStep1() {
+  selectedUserId = null;
+  document.getElementById('auth-subtitle').textContent = 'Войдите в свой аккаунт';
+  showAuthStep('step1');
+}
+
+function goToRegister() {
+  document.getElementById('auth-subtitle').textContent = 'Создать аккаунт';
+  document.getElementById('reg-name').value = '';
+  document.getElementById('reg-password').value = '';
+  document.getElementById('reg-password2').value = '';
+  document.getElementById('auth-error-reg').style.display = 'none';
+
+  // Рендерим выбор роли (роль creator нельзя выбрать при регистрации — она уникальная)
+  const picker = document.getElementById('role-picker');
+  picker.innerHTML = ROLES.filter(r => r.id !== 'creator').map(r => `
+    <div class="role-option" data-role="${r.id}" onclick="selectRole('${r.id}')">
+      <span class="role-icon">${r.icon}</span>
+      <span class="role-label">${r.label}</span>
+    </div>`).join('');
+  // Выбираем ученика по умолчанию
+  selectRole('pupil');
+
+  showAuthStep('step3');
+  setTimeout(() => document.getElementById('reg-name').focus(), 100);
+}
+
+function selectRole(roleId) {
+  document.querySelectorAll('.role-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.role === roleId);
+  });
+}
+
+function showAuthStep(step) {
+  ['step1','step2','step3'].forEach(s => {
+    document.getElementById(`auth-${s}`).style.display = s === step ? 'block' : 'none';
+  });
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const pwd  = document.getElementById('reg-password').value;
+  const pwd2 = document.getElementById('reg-password2').value;
+  const roleEl = document.querySelector('.role-option.selected');
+  const role = roleEl ? roleEl.dataset.role : 'pupil';
+
+  const errEl = document.getElementById('auth-error-reg');
+  const showRegError = msg => { errEl.textContent = msg; errEl.style.display = 'block'; };
+
+  if (!name) { showRegError('Введите имя и фамилию!'); return; }
+  if (name.length < 2) { showRegError('Имя слишком короткое.'); return; }
+  if (!pwd) { showRegError('Придумайте пароль!'); return; }
+  if (pwd.length < 4) { showRegError('Пароль минимум 4 символа.'); return; }
+  if (pwd !== pwd2) { showRegError('Пароли не совпадают!'); return; }
+  if (role === 'creator') { showRegError('Нельзя создать аккаунт с этой ролью.'); return; }
+
+  // Проверяем дубликат имени
+  if (USERS.find(u => u.name.toLowerCase() === name.toLowerCase())) {
+    showRegError('Пользователь с таким именем уже есть.'); return;
+  }
+
+  showLoadingOverlay(true);
+
+  // Если BIN ещё не создан — создаём
+  if (!BIN_ID) {
+    try {
+      const res = await fetch(BIN_URL_BASE, {
+        method: 'POST',
+        headers: { ...binHeaders(true), 'X-Bin-Name': 'class5a', 'X-Bin-Private': 'true' },
+        body: JSON.stringify({ users: [], questions: [], importantPosts: [], requests: [], meta: { nextQ:1, nextI:1, nextR:1 } })
+      });
+      const data = await res.json();
+      BIN_ID = data.metadata.id;
+      localStorage.setItem('class5a_bin_id', BIN_ID);
+    } catch(e) {
+      showLoadingOverlay(false);
+      showRegError('Ошибка сети. Попробуйте ещё раз.');
+      return;
+    }
+  }
+
+  const hash = await sha256(pwd);
+  const newUser = {
+    id: 'u_' + Date.now(),
+    name,
+    role,
+    initials: getInitials(name),
+    passwordHash: hash,
+    avatar: null
+  };
+
+  USERS.push(newUser);
+  saveData();
+
+  showLoadingOverlay(false);
+  showToast(`Аккаунт создан! Добро пожаловать, ${name.split(' ')[0]} 🎉`);
+
+  // Сразу входим
+  currentUser = { ...newUser };
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+
+async function doLogin() {
+  const password = document.getElementById('login-password').value;
+  if (!selectedUserId) return;
+  if (!password) { showError('Введите пароль!'); return; }
+
+  showLoadingOverlay(true);
+
+  // Перезагружаем USERS на случай если другой пользователь зарегистрировался
+  if (BIN_ID) {
+    try {
+      const res = await fetch(`${BIN_URL_BASE}/${BIN_ID}/latest`, { headers: binHeaders() });
+      const data = await res.json();
+      if (data.users && data.users.length) USERS = data.users;
+    } catch(e) {}
+  }
+
+  const hash = await sha256(password);
+  const user = USERS.find(u => u.id === selectedUserId);
+  showLoadingOverlay(false);
+
+  if (!user || user.passwordHash !== hash) {
+    showError('Неверный пароль. Попробуйте ещё раз!');
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-password').focus();
+    return;
+  }
+
+  currentUser = { ...user };
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+
+function showError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function doLogout() {
+  currentUser = null;
+  selectedUserId = null;
+  document.getElementById('tab-requests').style.display = 'none';
+  document.getElementById('important-form-section').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('login-password').value = '';
+  document.getElementById('auth-error').style.display = 'none';
+  goBackToStep1();
+}
+
+// ============================
+// INIT APP
+// ============================
+async function initApp() {
+  updateHeaderAvatar();
+  const nameEl = document.getElementById('header-name');
+  nameEl.innerHTML = currentUser.name + ' ' + renderTagInline(currentUser.role);
+  // Обновляем кнопку темы (она рендерится только после входа)
+  applyTheme(document.body.getAttribute('data-theme') === 'light');
+
+  if (currentUser.role === 'admin' || currentUser.role === 'creator') {
+    document.getElementById('tab-requests').style.display = 'flex';
+  }
+  if (currentUser.role === 'admin' || currentUser.role === 'creator' || currentUser.role === 'teacher') {
+    document.getElementById('important-form-section').style.display = 'block';
+  }
+
+  await loadData();
+  // Обновляем currentUser из свежих данных (могли поменяться аватарка/пароль)
+  const fresh = USERS.find(u => u.id === currentUser.id);
+  if (fresh) currentUser = { ...fresh };
+  updateHeaderAvatar();
+  switchTab('questions');
+  updateRequestsBadge();
+}
+
+function updateHeaderAvatar() {
+  const el = document.getElementById('header-avatar');
+  if (currentUser.avatar) {
+    el.innerHTML = `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  } else {
+    el.textContent = currentUser.initials;
+  }
+}
+
+function renderTagInline(role) {
+  if (role === 'creator') return '<span class="tag tag-creator">Админ</span>';
+  if (role === 'admin')   return '<span class="tag tag-admin">Админ</span>';
+  if (role === 'teacher') return '<span class="tag tag-teacher">Классный руководитель</span>';
+  return '';
+}
+
+// ============================
+// TABS
+// ============================
+function switchTab(name) {
+  if (name === 'requests' && currentUser.role !== 'admin' && currentUser.role !== 'creator') return;
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const tab = document.querySelector(`.nav-tab[data-tab="${name}"]`);
+  if (tab) tab.classList.add('active');
+  const panel = document.getElementById(`panel-${name}`);
+  if (panel) panel.classList.add('active');
+
+  if (name === 'questions') renderQuestions();
+  if (name === 'important') renderImportant();
+  if (name === 'requests') renderRequests();
+  if (name === 'profile') renderProfile();
+}
+
+// ============================
+// PROFILE
+// ============================
+function renderProfile() {
+  const av = document.getElementById('profile-avatar-display');
+  if (currentUser.avatar) {
+    av.innerHTML = `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  } else {
+    av.textContent = currentUser.initials;
+  }
+  document.getElementById('profile-fullname').textContent = currentUser.name;
+  document.getElementById('profile-role-tag').innerHTML = renderTagInline(currentUser.role) || '<span style="color:var(--muted);font-size:13px;font-weight:600;">Ученик</span>';
+  // Очищаем поля пароля
+  ['pwd-current','pwd-new','pwd-confirm'].forEach(id => document.getElementById(id).value = '');
+
+  // Управление ролями — только creator
+  const mgmtSection = document.getElementById('role-management-section');
+  if (currentUser.role === 'creator') {
+    mgmtSection.style.display = 'block';
+    renderRoleManagement();
+  } else {
+    mgmtSection.style.display = 'none';
+  }
+}
+
+function renderRoleManagement() {
+  const list = document.getElementById('role-management-list');
+  // Все кроме самого создателя
+  const others = USERS.filter(u => u.id !== currentUser.id);
+  if (!others.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:8px 0;">Пока нет других пользователей.</div>';
+    return;
+  }
+  list.innerHTML = others.map(u => {
+    const isAdmin = u.role === 'admin';
+    const initials = u.initials || getInitials(u.name);
+    const btn = isAdmin
+      ? `<button class="role-mgmt-btn demote" onclick="setUserRole('${u.id}', 'pupil')">− Убрать админа</button>`
+      : `<button class="role-mgmt-btn promote" onclick="setUserRole('${u.id}', 'admin')">+ Сделать админом</button>`;
+    return `
+      <div class="role-mgmt-row">
+        <div class="role-mgmt-avatar">${initials}</div>
+        <div class="role-mgmt-name">${u.name} ${renderTagInline(u.role)}</div>
+        ${btn}
+      </div>`;
+  }).join('');
+}
+
+function setUserRole(userId, newRole) {
+  const user = USERS.find(u => u.id === userId);
+  if (!user) return;
+  // Нельзя менять роль creator
+  if (user.role === 'creator') { showToast('Нельзя изменить роль создателя.'); return; }
+  user.role = newRole;
+  saveData();
+  showToast(newRole === 'admin'
+    ? `${user.name.split(' ')[0]} теперь админ ⚙️`
+    : `${user.name.split(' ')[0]} больше не админ`);
+  renderRoleManagement();
+}
+
+async function handleAvatarUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const dataUrl = e.target.result;
+    // Обновляем в USERS и currentUser
+    const idx = USERS.findIndex(u => u.id === currentUser.id);
+    if (idx !== -1) USERS[idx].avatar = dataUrl;
+    currentUser.avatar = dataUrl;
+    renderProfile();
+    updateHeaderAvatar();
+    saveData();
+    showToast('Аватарка обновлена! 🖼️');
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function changePassword() {
+  const current = document.getElementById('pwd-current').value;
+  const newPwd = document.getElementById('pwd-new').value;
+  const confirm = document.getElementById('pwd-confirm').value;
+
+  if (!current || !newPwd || !confirm) { showToast('Заполните все поля! 📝'); return; }
+  if (newPwd !== confirm) { showToast('Новые пароли не совпадают! ❌'); return; }
+  if (newPwd.length < 4) { showToast('Пароль минимум 4 символа!'); return; }
+
+  const currentHash = await sha256(current);
+  const user = USERS.find(u => u.id === currentUser.id);
+  if (!user || user.passwordHash !== currentHash) {
+    showToast('Текущий пароль неверный! ❌');
+    return;
+  }
+
+  const newHash = await sha256(newPwd);
+  const idx = USERS.findIndex(u => u.id === currentUser.id);
+  if (idx !== -1) USERS[idx].passwordHash = newHash;
+  currentUser.passwordHash = newHash;
+
+  ['pwd-current','pwd-new','pwd-confirm'].forEach(id => document.getElementById(id).value = '');
+  saveData();
+  showToast('Пароль успешно изменён! 🔒');
+}
+
+// ============================
+// QUESTIONS
+// ============================
+function renderQuestions() {
+  const list = document.getElementById('questions-list');
+  if (!questions.length) {
+    list.innerHTML = `<div class="empty-state"><span class="em">🤔</span><p>Пока вопросов нет. Задайте первый!</p></div>`;
+    return;
+  }
+  list.innerHTML = questions.map(q => renderQuestionCard(q)).join('');
+}
+
+function renderQuestionCard(q) {
+  const answers = q.answers.map(a => `
+    <div class="answer-item">
+      <div class="answer-author">
+        ${(()=>{const au=USERS.find(u=>u.id===a.authorId);return au?.avatar?`<img src="${au.avatar}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;margin-right:4px;">`:''})()}
+        ${a.authorName} ${renderTagInline(a.role)} <span style="color:var(--muted);font-weight:600;font-size:11px;margin-left:auto;">${a.time}</span>
+      </div>
+      <div class="answer-text">${escHtml(a.text)}</div>
+      ${a.photos && a.photos.length ? `<div class="answer-photos">${a.photos.map(src=>`<img src="${src}" onclick="openLightbox('${src}')">`).join('')}</div>` : ''}
+    </div>
+  `).join('');
+
+  const answerForm = `
+    <div class="answer-form" style="flex-direction:column;gap:8px;">
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="ans-input-${q.id}" placeholder="Написать ответ..." onkeydown="if(event.key==='Enter')submitAnswer(${q.id})" style="flex:1;">
+        <button class="btn-answer" onclick="submitAnswer(${q.id})">Ответить</button>
+      </div>
+      <label class="answer-photo-upload">
+        <input type="file" accept="image/*" multiple onchange="handleAnswerPhotoSelect(this,${q.id})">
+        📷 Фото к ответу
+      </label>
+      <div class="photo-previews" id="ans-photo-preview-${q.id}"></div>
+    </div>
+  `;
+
+  const qAuthor = USERS.find(u => u.id === q.authorId);
+  const qAvatarContent = q.anonymous ? '?' : (qAuthor?.avatar ? `<img src="${qAuthor.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : q.authorName[0]);
+  const qAvatarBg = q.anonymous ? 'linear-gradient(135deg,#aaa,#ccc)' : 'linear-gradient(135deg,#818cf8,#a78bfa)';
+  return `
+    <div class="card" id="q-card-${q.id}">
+      <div class="card-meta">
+        <div class="card-avatar" style="background:${qAvatarBg}">${qAvatarContent}</div>
+        <div class="card-author">${q.anonymous ? '<span style="color:var(--muted)">Аноним</span>' : escHtml(q.authorName)}</div>
+        <span class="card-time">${q.time}</span>
+      </div>
+      <div class="card-text">${escHtml(q.text)}</div>
+      ${renderPhotoGallery(q.photos)}
+      <div class="answers-section">
+        <div id="answers-${q.id}">${answers}</div>
+        ${answerForm}
+      </div>
+    </div>
+  `;
+}
+
+async function submitAnswer(qId) {
+  const inp = document.getElementById(`ans-input-${qId}`);
+  const text = inp.value.trim();
+  const photos = answerPhotoState[qId] || [];
+  if (!text && !photos.length) return;
+
+  const q = questions.find(x => x.id === qId);
+  if (!q) return;
+
+  const now = timeNow();
+  const answer = {
+    authorId: currentUser.id,
+    authorName: currentUser.name,
+    role: currentUser.role,
+    text: text || '', photos: [...photos], time: now
+  };
+  q.answers.push(answer);
+  answerPhotoState[qId] = [];
+
+  addRequest('answer', qId, `Ответ на: "${q.text.substring(0,50)}..." — ${text.substring(0,50)}`, currentUser.name, now);
+
+  inp.value = '';
+  renderQuestions();
+  updateRequestsBadge();
+  saveData();
+  showToast('Ответ отправлен! ✅');
+}
+
+// ============================
+// ASK A QUESTION
+// ============================
+async function submitQuestion() {
+  const text = document.getElementById('ask-text').value.trim();
+  const anon = document.getElementById('anon-toggle').checked;
+  const photos = [...photoState['ask']];
+  if (!text && !photos.length) { showToast('Напишите вопрос или прикрепите фото! 📝'); return; }
+
+  const now = timeNow();
+  const q = {
+    id: nextQuestionId++,
+    authorId: anon ? null : currentUser.id,
+    authorName: anon ? 'Аноним' : currentUser.name,
+    anonymous: anon,
+    text, photos, time: now, answers: []
+  };
+  questions.unshift(q);
+  photoState['ask'] = [];
+  document.getElementById('ask-previews').innerHTML = '';
+
+  addRequest('question', q.id, text || '📷 Фото', anon ? 'Аноним' : currentUser.name, now);
+  updateRequestsBadge();
+
+  document.getElementById('ask-text').value = '';
+  document.getElementById('anon-toggle').checked = false;
+  saveData();
+  showToast('Вопрос отправлен! 🚀');
+  switchTab('questions');
+}
+
+// ============================
+// IMPORTANT
+// ============================
+function renderImportant() {
+  const list = document.getElementById('important-list');
+  if (!importantPosts.length) {
+    list.innerHTML = `<div class="empty-state"><span class="em">📭</span><p>Важных объявлений пока нет.</p></div>`;
+    return;
+  }
+  list.innerHTML = importantPosts.map(p => `
+    <div class="important-card">
+      <div class="card-meta">
+        <div class="card-avatar" style="background:linear-gradient(135deg,#ffcc00,#ff9800)">${p.authorName[0]}</div>
+        <div class="card-author">${escHtml(p.authorName)} ${renderTagInline(p.role)}</div>
+        <span class="card-time">${p.time}</span>
+      </div>
+      <div class="card-text">${escHtml(p.text)}</div>
+      ${renderPhotoGallery(p.photos)}
+    </div>
+  `).join('');
+}
+
+async function postImportant() {
+  const text = document.getElementById('important-text').value.trim();
+  const photos = [...photoState['imp']];
+  if (!text && !photos.length) { showToast('Введите текст или прикрепите фото! 📝'); return; }
+
+  const post = {
+    id: nextImportantId++,
+    authorId: currentUser.id,
+    authorName: currentUser.name,
+    role: currentUser.role,
+    text: text || '',
+    photos,
+    time: timeNow()
+  };
+  importantPosts.unshift(post);
+  photoState['imp'] = [];
+  document.getElementById('imp-previews').innerHTML = '';
+  document.getElementById('important-text').value = '';
+  renderImportant();
+  saveData();
+  showToast('Объявление опубликовано! ⚡');
+}
+
+// ============================
+// REQUESTS (admin)
+// ============================
+function addRequest(type, refId, preview, authorName, time) {
+  requests.unshift({ id: nextRequestId++, type, refId, preview, authorName, time, dismissed: false });
+}
+
+function updateRequestsBadge() {
+  const active = requests.filter(r => !r.dismissed).length;
+  const badge = document.getElementById('requests-badge');
+  if (badge) badge.textContent = active;
+}
+
+function renderRequests() {
+  const list = document.getElementById('requests-list');
+  const active = requests.filter(r => !r.dismissed);
+  if (!active.length) {
+    list.innerHTML = `<div class="empty-state"><span class="em">📭</span><p>Новых запросов нет.</p></div>`;
+    return;
+  }
+  list.innerHTML = active.map(r => `
+    <div class="request-card" id="req-${r.id}">
+      <span class="request-type ${r.type === 'question' ? 'type-question' : 'type-answer'}">${r.type === 'question' ? '❓ Вопрос' : '💬 Ответ'}</span>
+      <div class="card-meta" style="margin-bottom:8px;">
+        <div class="card-author">${escHtml(r.authorName)}</div>
+        <span class="card-time">${r.time}</span>
+      </div>
+      <div class="card-text" style="font-size:14px;">${escHtml(r.preview.substring(0,120))}${r.preview.length > 120 ? '…' : ''}</div>
+      <div class="request-actions">
+        <button class="btn-promote" onclick="promoteToImportant(${r.id})">⚡ В «Важное»</button>
+        <button class="btn-dismiss" onclick="dismissRequest(${r.id})">Отклонить</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function promoteToImportant(reqId) {
+  const r = requests.find(x => x.id === reqId);
+  if (!r) return;
+  r.dismissed = true;
+
+  const post = {
+    id: nextImportantId++,
+    authorId: currentUser.id,
+    authorName: currentUser.name,
+    role: currentUser.role,
+    text: '🔁 ' + r.preview,
+    time: timeNow()
+  };
+  importantPosts.unshift(post);
+  updateRequestsBadge();
+  renderRequests();
+  saveData();
+  showToast('Перенесено в «Важное»! ⚡');
+}
+
+async function dismissRequest(reqId) {
+  const r = requests.find(x => x.id === reqId);
+  if (r) r.dismissed = true;
+  updateRequestsBadge();
+  renderRequests();
+  saveData();
+  showToast('Запрос отклонён');
+}
+
+// ============================
+// HELPERS
+// ============================
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeNow() {
+  const d = new Date();
+  return d.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }) + ', ' +
+    d.getDate() + ' ' + ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()];
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Enter для входа
+document.getElementById('login-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// Init select
+populateLogin();
+
+// ============================
+// THEME
+// ============================
+function applyTheme(isLight) {
+  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = isLight ? '#f2f4f8' : '#1a1a2e';
+}
+
+function toggleTheme() {
+  const isLight = document.body.getAttribute('data-theme') !== 'light';
+  localStorage.setItem('class5a_theme', isLight ? 'light' : 'dark');
+  applyTheme(isLight);
+}
+
+// Apply saved theme immediately on script load (before paint)
+(function() {
+  const saved = localStorage.getItem('class5a_theme');
+  applyTheme(saved === 'light');
+})();
+
+// ============================
+// PWA SERVICE WORKER
+// ============================
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'class5a-v1';
+    const ASSETS = [location.href];
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys =>
+        Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      ));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      if (e.request.url.includes('jsonbin.io') || e.request.url.includes('fonts.googleapis')) return;
+      e.respondWith(
+        fetch(e.request).catch(() => caches.match(e.request))
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+</script>
+
+</body>
+</html>
