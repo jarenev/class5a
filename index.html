@@ -4,13 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <script>
-  // Применяем тему ДО рендера страницы — убирает мигание
-  (function(){
-    var t = localStorage.getItem('class5a_theme');
-    if (t) {
-      document.documentElement.setAttribute('data-theme', t);
-    }
-  })();
+  // Принудительно тёмная тема
+  document.documentElement.setAttribute('data-theme', 'dark');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -34,6 +29,8 @@
   }]
 }">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
   :root {
     /* backgrounds */
@@ -1648,41 +1645,78 @@ async function sha256(str) {
 }
 
 // ============================
-// JSONBIN
+// FIREBASE
 // ============================
-const BIN_KEY = '$2a$10$nOBnP/FXGXqRLbP0p3epne7xLCwGuOzzIRRKIfjTv8GPlFSl.ZJNG';
-const BIN_URL_BASE = 'https://api.jsonbin.io/v3/b';
-const BIN_VERSION = 'v7_preset30'; // 27 захардкоженных пользователей
-if (localStorage.getItem('class5a_bin_version') !== BIN_VERSION) {
-  localStorage.removeItem('class5a_bin_id');
-  localStorage.removeItem('class5a_current_user');
-  localStorage.setItem('class5a_bin_version', BIN_VERSION);
-}
-let BIN_ID = localStorage.getItem('class5a_bin_id') || null;
+const firebaseConfig = {
+  apiKey: "AIzaSyCnSydJGJmfJcFgyZvUyhOrtgD9Uqect2Q",
+  authDomain: "class5a.firebaseapp.com",
+  databaseURL: "https://class5a-default-rtdb.firebaseio.com",
+  projectId: "class5a",
+  storageBucket: "class5a.firebasestorage.app",
+  messagingSenderId: "1022786591139",
+  appId: "1:1022786591139:web:a43f0bfa6879e8e623a216"
+};
 
-function binHeaders(write = false) {
-  const h = { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY };
-  if (!write) h['X-Bin-Meta'] = 'false';
-  return h;
+// Firebase SDK загружается через CDN в <head>, ждём готовности
+let _db = null;
+let _fbSet = null;
+let _fbRef = null;
+let _fbOnValue = null;
+let _realtimeUnsub = null; // отписка от real-time listener
+
+function _initFirebase() {
+  if (_db) return;
+  const app = firebase.initializeApp(firebaseConfig);
+  _db = firebase.database(app);
+  _fbRef  = (path) => firebase.database.ref(_db, path);
+  _fbSet  = (ref, val) => firebase.database.set(ref, val);
+  _fbOnValue = (ref, cb) => firebase.database.onValue(ref, cb);
 }
 
+// Запись всего состояния в Firebase
+let _saveTimer = null;
+function saveData() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_flushSave, 700);
+}
+
+async function _flushSave() {
+  try {
+    _initFirebase();
+    await _fbSet(_fbRef('appdata'), {
+      users: USERS,
+      questions,
+      importantPosts,
+      requests,
+      meta: { nextQ: nextQuestionId, nextI: nextImportantId, nextR: nextRequestId }
+    });
+  } catch(e) {
+    showToast('Не удалось сохранить, проверьте интернет 😢');
+  }
+}
+
+// Одноразовое чтение данных
 async function loadData() {
   showLoadingOverlay(true);
   try {
-    if (BIN_ID) {
-      const res = await fetch(`${BIN_URL_BASE}/${BIN_ID}/latest`, { headers: binHeaders() });
-      const data = await res.json();
-      // Берём пользователей из бина; если бин пустой — используем пресет
-      USERS = (data.users && data.users.length) ? data.users : DEFAULT_USERS.map(u => ({...u}));
-      questions = data.questions || [];
-      importantPosts = data.importantPosts || [];
-      requests = data.requests || [];
-      nextQuestionId = data.meta?.nextQ || (questions.length ? Math.max(...questions.map(q=>q.id))+1 : 1);
-      nextImportantId = data.meta?.nextI || (importantPosts.length ? Math.max(...importantPosts.map(p=>p.id))+1 : 1);
-      nextRequestId = data.meta?.nextR || (requests.length ? Math.max(...requests.map(r=>r.id))+1 : 1);
+    _initFirebase();
+    const snapshot = await firebase.database.get(_fbRef('appdata'));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      USERS         = (data.users && data.users.length) ? data.users : DEFAULT_USERS.map(u => ({...u}));
+      questions     = data.questions     || [];
+      importantPosts= data.importantPosts|| [];
+      requests      = data.requests      || [];
+      nextQuestionId = data.meta?.nextQ  || (questions.length     ? Math.max(...questions.map(q=>q.id))+1     : 1);
+      nextImportantId= data.meta?.nextI  || (importantPosts.length? Math.max(...importantPosts.map(p=>p.id))+1: 1);
+      nextRequestId  = data.meta?.nextR  || (requests.length      ? Math.max(...requests.map(r=>r.id))+1      : 1);
     } else {
-      // Бин ещё не создан — используем пресет локально
+      // Первый запуск — записываем пресет
       USERS = DEFAULT_USERS.map(u => ({...u}));
+      await _fbSet(_fbRef('appdata'), {
+        users: USERS, questions: [], importantPosts: [], requests: [],
+        meta: { nextQ: 1, nextI: 1, nextR: 1 }
+      });
     }
   } catch(e) {
     showToast('Ошибка загрузки данных 😢');
@@ -1691,48 +1725,31 @@ async function loadData() {
   showLoadingOverlay(false);
 }
 
-// ── Очередь сохранений: debounce 600ms + 3 попытки ──────────────────────────
-let _saveTimer = null;
-let _saving = false;
-let _pendingSave = false;
-
-function saveData() {
-  // debounce — откладываем на 600ms, чтобы не спамить при быстрых действиях
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(_flushSave, 600);
-}
-
-async function _flushSave() {
-  if (_saving) { _pendingSave = true; return; }
-  if (!BIN_ID) return;
-  _saving = true;
-  _pendingSave = false;
-
-  const body = JSON.stringify({
-    users: USERS, questions, importantPosts, requests,
-    meta: { nextQ: nextQuestionId, nextI: nextImportantId, nextR: nextRequestId }
+// Real-time подписка — обновляет данные у всех сразу после чужого сохранения
+function subscribeRealtime() {
+  _initFirebase();
+  if (_realtimeUnsub) _realtimeUnsub();
+  _realtimeUnsub = _fbOnValue(_fbRef('appdata'), (snapshot) => {
+    if (!snapshot.exists() || !currentUser) return;
+    const data = snapshot.val();
+    USERS          = (data.users && data.users.length) ? data.users : USERS;
+    questions      = data.questions      || [];
+    importantPosts = data.importantPosts || [];
+    requests       = data.requests       || [];
+    nextQuestionId = data.meta?.nextQ    || nextQuestionId;
+    nextImportantId= data.meta?.nextI    || nextImportantId;
+    nextRequestId  = data.meta?.nextR    || nextRequestId;
+    // Обновляем currentUser если его данные изменились
+    const fresh = USERS.find(u => u.id === currentUser.id);
+    if (fresh) currentUser = { ...fresh };
+    updateHeaderAvatar();
+    updateRequestsBadge();
+    // Перерисовываем активную вкладку
+    const activeTab = document.querySelector('.nav-tab.active')?.dataset?.tab;
+    if (activeTab === 'questions')  renderQuestions();
+    if (activeTab === 'important')  renderImportant();
+    if (activeTab === 'requests')   renderRequests();
   });
-
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    try {
-      const res = await fetch(`${BIN_URL_BASE}/${BIN_ID}`, {
-        method: 'PUT',
-        headers: binHeaders(true),
-        body
-      });
-      if (res.ok) { _saving = false; if (_pendingSave) _flushSave(); return; }
-      if (res.status === 429) {
-        await new Promise(r => setTimeout(r, 2000 * attempt)); // rate-limit
-        continue;
-      }
-      // другая ошибка — ждём и повторяем
-      await new Promise(r => setTimeout(r, 1000 * attempt));
-    } catch(e) {
-      await new Promise(r => setTimeout(r, 1000 * attempt));
-    }
-  }
-  _saving = false;
-  showToast('Не удалось сохранить, проверьте интернет 😢');
 }
 
 function showLoadingOverlay(show) {
@@ -1852,18 +1869,15 @@ let selectedUserId = null;
 
 async function populateLogin() {
   showLoadingOverlay(true);
-  if (!BIN_ID && localStorage.getItem('class5a_bin_id')) {
-    BIN_ID = localStorage.getItem('class5a_bin_id');
-  }
-  if (BIN_ID) {
-    try {
-      const res = await fetch(`${BIN_URL_BASE}/${BIN_ID}/latest`, { headers: binHeaders() });
-      const data = await res.json();
-      USERS = (data.users && data.users.length) ? data.users : DEFAULT_USERS.map(u => ({...u}));
-    } catch(e) {
+  try {
+    _initFirebase();
+    const snapshot = await firebase.database.get(_fbRef('appdata/users'));
+    if (snapshot.exists()) {
+      USERS = snapshot.val();
+    } else {
       USERS = DEFAULT_USERS.map(u => ({...u}));
     }
-  } else {
+  } catch(e) {
     USERS = DEFAULT_USERS.map(u => ({...u}));
   }
   showLoadingOverlay(false);
@@ -1987,16 +2001,8 @@ async function doRegister() {
 
   // Если BIN ещё не создан — создаём
   if (!BIN_ID) {
-    try {
-      const res = await fetch(BIN_URL_BASE, {
-        method: 'POST',
-        headers: { ...binHeaders(true), 'X-Bin-Name': 'class5a', 'X-Bin-Private': 'true' },
-        body: JSON.stringify({ users: [], questions: [], importantPosts: [], requests: [], meta: { nextQ:1, nextI:1, nextR:1 } })
-      });
-      const data = await res.json();
-      BIN_ID = data.metadata.id;
-      localStorage.setItem('class5a_bin_id', BIN_ID);
-    } catch(e) {
+    const ok = await ensureBinId();
+    if (!ok) {
       showLoadingOverlay(false);
       showRegError('Ошибка сети. Попробуйте ещё раз.');
       return;
@@ -2034,13 +2040,11 @@ async function doLogin() {
   showLoadingOverlay(true);
 
   // Перезагружаем USERS на случай если другой пользователь зарегистрировался
-  if (BIN_ID) {
-    try {
-      const res = await fetch(`${BIN_URL_BASE}/${BIN_ID}/latest`, { headers: binHeaders() });
-      const data = await res.json();
-      if (data.users && data.users.length) USERS = data.users;
-    } catch(e) {}
-  }
+  try {
+    _initFirebase();
+    const snapshot = await firebase.database.get(_fbRef('appdata/users'));
+    if (snapshot.exists()) USERS = snapshot.val();
+  } catch(e) {}
 
   const hash = await sha256(password);
   const user = USERS.find(u => u.id === selectedUserId);
@@ -2067,6 +2071,7 @@ function showError(msg) {
 }
 
 function doLogout() {
+  if (_realtimeUnsub) { _realtimeUnsub(); _realtimeUnsub = null; }
   currentUser = null;
   selectedUserId = null;
   document.getElementById('tab-requests').style.display = 'none';
@@ -2085,8 +2090,6 @@ async function initApp() {
   updateHeaderAvatar();
   const nameEl = document.getElementById('header-name');
   nameEl.innerHTML = currentUser.name + ' ' + renderTagInline(currentUser.role);
-  // Обновляем кнопку темы (она рендерится только после входа)
-  applyTheme(document.body.getAttribute('data-theme') === 'light');
 
   if (currentUser.role === 'admin' || currentUser.role === 'creator') {
     document.getElementById('tab-requests').style.display = 'flex';
@@ -2096,12 +2099,14 @@ async function initApp() {
   }
 
   await loadData();
-  // Обновляем currentUser из свежих данных (могли поменяться аватарка/пароль)
+  // Обновляем currentUser из свежих данных
   const fresh = USERS.find(u => u.id === currentUser.id);
   if (fresh) currentUser = { ...fresh };
   updateHeaderAvatar();
   switchTab('questions');
   updateRequestsBadge();
+  // Подписываемся на real-time обновления от других пользователей
+  subscribeRealtime();
 }
 
 function updateHeaderAvatar() {
@@ -2500,27 +2505,11 @@ document.getElementById('login-password').addEventListener('keydown', e => {
 populateLogin();
 
 // ============================
-// THEME
+// THEME — fixed dark
 // ============================
-function applyTheme(isLight) {
-  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
-  const btn = document.getElementById('theme-toggle');
-  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = isLight ? '#f2f4f8' : '#1a1a2e';
-}
-
-function toggleTheme() {
-  const isLight = document.documentElement.getAttribute('data-theme') !== 'light';
-  localStorage.setItem('class5a_theme', isLight ? 'light' : 'dark');
-  applyTheme(isLight);
-}
-
-// Apply saved theme immediately on script load (before paint)
-(function() {
-  const saved = localStorage.getItem('class5a_theme');
-  applyTheme(saved === 'light');
-})();
+document.documentElement.setAttribute('data-theme', 'dark');
+const _themeMeta = document.querySelector('meta[name="theme-color"]');
+if (_themeMeta) _themeMeta.content = '#1a1a2e';
 
 // ============================
 // PWA SERVICE WORKER
@@ -2540,7 +2529,7 @@ if ('serviceWorker' in navigator) {
       self.clients.claim();
     });
     self.addEventListener('fetch', e => {
-      if (e.request.url.includes('jsonbin.io') || e.request.url.includes('fonts.googleapis')) return;
+      if (e.request.url.includes('firebasedatabase.app') || e.request.url.includes('fonts.googleapis')) return;
       e.respondWith(
         fetch(e.request).catch(() => caches.match(e.request))
       );
