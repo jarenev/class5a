@@ -29,8 +29,6 @@
   }]
 }">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
   :root {
     /* backgrounds */
@@ -1461,7 +1459,7 @@ width: 100%;
 
 <!-- QUESTIONS TAB -->
 <div class="tab-panel active" id="panel-questions">
-  <div class="section-title"><span class="icon">💬</span> Вопросы от ребят</div>
+  <div class="section-title"><span class="icon">💬</span> Сообщения/вопросы от ребят</div>
   <div id="questions-list"></div>
 </div>
 
@@ -1578,6 +1576,9 @@ width: 100%;
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 <script>
 // ============================
 // DATA & USERS
@@ -1657,8 +1658,14 @@ const firebaseConfig = {
   appId: "1:1022786591139:web:a43f0bfa6879e8e623a216"
 };
 
-firebase.initializeApp(firebaseConfig);
-const _db = firebase.database();
+let _db = null;
+function getDb() {
+  if (!_db) {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    _db = firebase.database();
+  }
+  return _db;
+}
 
 // Запись всего состояния
 let _saveTimer = null;
@@ -1669,7 +1676,7 @@ function saveData() {
 
 async function _flushSave() {
   try {
-    await _db.ref('appdata').set({
+    await getDb().ref('appdata').set({
       users: USERS,
       questions,
       importantPosts,
@@ -1682,23 +1689,29 @@ async function _flushSave() {
 }
 
 // Одноразовое чтение
+// Конвертирует объект Firebase {0:{...},1:{...}} или null в массив
+function fbArr(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  return Object.values(val);
+}
+
 async function loadData() {
   showLoadingOverlay(true);
   try {
-    const snapshot = await _db.ref('appdata').get();
+    const snapshot = await getDb().ref('appdata').get();
     if (snapshot.exists()) {
       const data = snapshot.val();
-      USERS          = (data.users && data.users.length) ? data.users : DEFAULT_USERS.map(u => ({...u}));
-      questions      = data.questions      || [];
-      importantPosts = data.importantPosts || [];
-      requests       = data.requests       || [];
-      nextQuestionId  = data.meta?.nextQ   || (questions.length      ? Math.max(...questions.map(q=>q.id))+1      : 1);
-      nextImportantId = data.meta?.nextI   || (importantPosts.length ? Math.max(...importantPosts.map(p=>p.id))+1 : 1);
-      nextRequestId   = data.meta?.nextR   || (requests.length       ? Math.max(...requests.map(r=>r.id))+1       : 1);
+      USERS          = fbArr(data.users).length ? fbArr(data.users) : DEFAULT_USERS.map(u => ({...u}));
+      questions      = fbArr(data.questions).map(q => ({ ...q, answers: fbArr(q.answers) }));
+      importantPosts = fbArr(data.importantPosts);
+      requests       = fbArr(data.requests);
+      nextQuestionId  = data.meta?.nextQ  || (questions.length      ? Math.max(...questions.map(q=>q.id))+1      : 1);
+      nextImportantId = data.meta?.nextI  || (importantPosts.length ? Math.max(...importantPosts.map(p=>p.id))+1 : 1);
+      nextRequestId   = data.meta?.nextR  || (requests.length       ? Math.max(...requests.map(r=>r.id))+1       : 1);
     } else {
-      // Первый запуск — пишем пресет
       USERS = DEFAULT_USERS.map(u => ({...u}));
-      await _db.ref('appdata').set({
+      await getDb().ref('appdata').set({
         users: USERS, questions: [], importantPosts: [], requests: [],
         meta: { nextQ: 1, nextI: 1, nextR: 1 }
       });
@@ -1716,14 +1729,14 @@ let _realtimeCb  = null;
 
 function subscribeRealtime() {
   if (_realtimeRef) _realtimeRef.off('value', _realtimeCb);
-  _realtimeRef = _db.ref('appdata');
+  _realtimeRef = getDb().ref('appdata');
   _realtimeCb  = (snapshot) => {
     if (!snapshot.exists() || !currentUser) return;
     const data = snapshot.val();
-    USERS          = (data.users && data.users.length) ? data.users : USERS;
-    questions      = data.questions      || [];
-    importantPosts = data.importantPosts || [];
-    requests       = data.requests       || [];
+    USERS          = fbArr(data.users).length ? fbArr(data.users) : USERS;
+    questions      = fbArr(data.questions).map(q => ({ ...q, answers: fbArr(q.answers) }));
+    importantPosts = fbArr(data.importantPosts);
+    requests       = fbArr(data.requests);
     nextQuestionId  = data.meta?.nextQ   || nextQuestionId;
     nextImportantId = data.meta?.nextI   || nextImportantId;
     nextRequestId   = data.meta?.nextR   || nextRequestId;
@@ -1861,7 +1874,7 @@ let selectedUserId = null;
 async function populateLogin() {
   showLoadingOverlay(true);
   try {
-    const snapshot = await _db.ref('appdata/users').get();
+    const snapshot = await getDb().ref('appdata/users').get();
     if (snapshot.exists()) {
       USERS = snapshot.val();
     } else {
@@ -1894,7 +1907,13 @@ function renderUserList() {
     return;
   }
 
-  list.innerHTML = USERS.map((u, i) => {
+  const sorted = [...USERS].sort((a, b) => {
+    const lastA = a.name.trim().split(/\s+/)[0] || '';
+    const lastB = b.name.trim().split(/\s+/)[0] || '';
+    return lastA.localeCompare(lastB, 'ru');
+  });
+
+  list.innerHTML = sorted.map((u, i) => {
     const avatarContent = u.avatar ? `<img src="${u.avatar}">` : (u.initials || getInitials(u.name));
     const grad = gradients[i % gradients.length];
     return `
@@ -2021,7 +2040,7 @@ async function doLogin() {
 
   // Перезагружаем USERS на случай если другой пользователь зарегистрировался
   try {
-    const snapshot = await _db.ref('appdata/users').get();
+    const snapshot = await getDb().ref('appdata/users').get();
     if (snapshot.exists()) USERS = snapshot.val();
   } catch(e) {}
 
@@ -2098,7 +2117,7 @@ function updateHeaderAvatar() {
 }
 
 function renderTagInline(role) {
-  if (role === 'creator') return '<span class="tag tag-creator">Админ</span>';
+  if (role === 'creator') return '<span class="tag tag-admin">Админ</span>';
   if (role === 'admin')   return '<span class="tag tag-admin">Админ</span>';
   if (role === 'teacher') return '<span class="tag tag-teacher">Классный руководитель</span>';
   return '';
@@ -2480,8 +2499,13 @@ document.getElementById('login-password').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 
-// Init select
-populateLogin();
+// Запускаем после полной загрузки страницы и SDK
+window.addEventListener('load', () => {
+  if (!_db) {
+    try { _db = firebase.database(); } catch(e) {}
+  }
+  populateLogin();
+});
 
 // ============================
 // THEME — fixed dark
@@ -2508,7 +2532,12 @@ if ('serviceWorker' in navigator) {
       self.clients.claim();
     });
     self.addEventListener('fetch', e => {
-      if (e.request.url.includes('firebasedatabase.app') || e.request.url.includes('fonts.googleapis')) return;
+      if (
+        e.request.url.includes('firebasedatabase.app') ||
+        e.request.url.includes('firebaseio.com') ||
+        e.request.url.includes('gstatic.com') ||
+        e.request.url.includes('googleapis.com')
+      ) return;
       e.respondWith(
         fetch(e.request).catch(() => caches.match(e.request))
       );
